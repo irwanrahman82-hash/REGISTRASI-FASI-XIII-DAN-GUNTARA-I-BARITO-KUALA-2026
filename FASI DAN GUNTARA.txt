@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Seleksi Umur FASI & GUNTARA</title>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f4f7f9; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 35px; border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 5px solid #1a73e8; }
+        h2 { color: #1a73e8; text-align: center; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .sub { text-align: center; color: #5f6368; font-size: 0.9em; margin-bottom: 25px; font-weight: 500; }
+        label { font-weight: 600; display: block; margin-top: 18px; color: #3c4043; font-size: 0.95em; }
+        input, select, button { width: 100%; padding: 14px; margin-top: 8px; border: 2px solid #e0e0e0; border-radius: 10px; box-sizing: border-box; transition: 0.3s; font-size: 15px; }
+        input:focus, select:focus { border-color: #1a73e8; outline: none; background: #f8fbff; }
+        .btn-cek { background: #1a73e8; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 30px; }
+        .btn-cek:hover { background: #1557b0; transform: translateY(-1px); }
+        .btn-daftar { background: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; text-decoration: none; text-align: center; display: none; }
+        .btn-daftar:hover { background: #1e8449; }
+        #result { margin-top: 25px; padding: 20px; border-radius: 12px; display: none; text-align: center; font-size: 15px; border: 1px solid transparent; }
+        .success { background: #e6f4ea; color: #137333; border-color: #ceead6; }
+        .error { background: #fce8e6; color: #c5221f; border-color: #fad2cf; }
+        .info-label { font-size: 0.8em; color: #70757a; margin-top: 5px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>E-Pendaftaran</h2>
+    <p class="sub">LPPTKA BKPRMI - Seleksi Otomatis Juknis</p>
+
+    <label>Nama Lengkap (Sesuai Ijazah/KK):</label>
+    <input type="text" id="nama" placeholder="Contoh: Ahmad Fauzi">
+
+    <label>Unit TK/TP Al-Qur'an:</label>
+    <input type="text" id="unit" placeholder="Masukkan Nama Unit/Kecamatan">
+
+    <label>Kategori Lomba:</label>
+    <select id="kategori">
+        <optgroup label="FASI XIII (Santri)">
+            <option value="TKA">TKA (Maksimal 7 Tahun)</option>
+            <option value="TPA">TPA (Di atas 7 - 12 Tahun)</option>
+            <option value="TQA">TQA (Di atas 12 - 15 Tahun)</option>
+        </optgroup>
+        <optgroup label="GUNTARA I (Ustadz/ah)">
+            <option value="GUNTARA">GUNTARA (18 - 45 Tahun)</option>
+        </optgroup>
+    </select>
+
+    <label>Jenis Kepesertaan:</label>
+    <select id="jenis">
+        <option value="PERORANGAN">PERORANGAN</option>
+        <option value="GROUP">GROUP / BEREGU</option>
+    </select>
+
+    <label>Tanggal Lahir:</label>
+    <input type="date" id="tglLahir">
+    <div class="info-label">*Umur dihitung per 1 Juli 2026. Untuk Group, masukkan tanggal lahir perwakilan/anggota tertua.</div>
+
+    <button class="btn-cek" onclick="validasiPendaftaran()">Verifikasi Kelayakan Umur</button>
+
+    <div id="result"></div>
+    
+    <a href="#" id="linkDaftar" class="btn-daftar" target="_blank">Lanjut ke Formulir Pendaftaran →</a>
+</div>
+
+<script>
+function validasiPendaftaran() {
+    const nama = document.getElementById('nama').value.trim();
+    const unit = document.getElementById('unit').value.trim();
+    const kategori = document.getElementById('kategori').value;
+    const jenis = document.getElementById('jenis').value;
+    const tglInput = document.getElementById('tglLahir').value;
+    const resultDiv = document.getElementById('result');
+    const btnDaftar = document.getElementById('linkDaftar');
+
+    // Pemetaan Link sesuai permintaan
+    const links = {
+        "FASI": {
+            "PERORANGAN": "https://forms.gle/kpwFuToc5gdX3sU38",
+            "GROUP": "https://forms.gle/hDcr8RTVtX7AVqzv5"
+        },
+        "GUNTARA": {
+            "PERORANGAN": "https://forms.gle/Ecf8Qmg5tWgFMfCC8",
+            "GROUP": "https://forms.gle/v8tDH9KnTvoUWfpW6"
+        }
+    };
+
+    if (!nama || !unit || !tglInput) {
+        alert("Harap lengkapi data Nama, Unit, dan Tanggal Lahir!");
+        return;
+    }
+
+    const tglLahir = new Date(tglInput);
+    const tglCutOff = new Date('2026-07-01');
+
+    let thn = tglCutOff.getFullYear() - tglLahir.getFullYear();
+    let bln = tglCutOff.getMonth() - tglLahir.getMonth();
+    let hr = tglCutOff.getDate() - tglLahir.getDate();
+
+    if (hr < 0) {
+        bln--;
+        const lastDayPrevMonth = new Date(tglCutOff.getFullYear(), tglCutOff.getMonth(), 0).getDate();
+        hr += lastDayPrevMonth;
+    }
+    if (bln < 0) {
+        thn--;
+        bln += 12;
+    }
+
+    let min = 0, max = 0, labelKategori = "", grupInduk = "";
+    if (kategori === "TKA") { min = 0; max = 7; labelKategori = "FASI TKA"; grupInduk = "FASI"; }
+    else if (kategori === "TPA") { min = 7; max = 12; labelKategori = "FASI TPA"; grupInduk = "FASI"; }
+    else if (kategori === "TQA") { min = 12; max = 15; labelKategori = "FASI TQA"; grupInduk = "FASI"; }
+    else if (kategori === "GUNTARA") { min = 18; max = 45; labelKategori = "GUNTARA"; grupInduk = "GUNTARA"; }
+
+    resultDiv.style.display = "block";
+
+    const sudahLewatBatasMaks = (thn > max || (thn === max && (bln > 0 || hr > 0)));
+    const belumCukupMin = (thn < min || (thn === min && bln === 0 && hr === 0 && min !== 0)); 
+
+    if (belumCukupMin) {
+        resultDiv.className = "error";
+        resultDiv.innerHTML = `⚠️ <strong>DITOLAK: TERLALU MUDA</strong><br><small>Umur Anda ${thn} Thn. Minimal untuk ${labelKategori} adalah ${min} Tahun.</small>`;
+        btnDaftar.style.display = "none";
+    } else if (sudahLewatBatasMaks) {
+        resultDiv.className = "error";
+        resultDiv.innerHTML = `⚠️ <strong>DITOLAK: MELEWATI BATAS</strong><br><small>Umur Anda ${thn} Thn ${bln} Bln. Maksimal untuk ${labelKategori} adalah ${max} Tahun.</small>`;
+        btnDaftar.style.display = "none";
+    } else {
+        resultDiv.className = "success";
+        resultDiv.innerHTML = `✅ <strong>LOLOS VERIFIKASI UMUR</strong><br><small>Halo ${nama}, data Anda sesuai untuk kategori <b>${labelKategori} (${jenis})</b>.</small>`;
+        
+        // Pilih Link berdasarkan Grup Induk (FASI/GUNTARA) dan Jenis (Perorangan/Group)
+        btnDaftar.href = links[grupInduk][jenis];
+        btnDaftar.style.display = "block";
+    }
+}
+</script>
+
+</body>
+</html>
